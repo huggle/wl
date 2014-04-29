@@ -6,10 +6,16 @@ class Whitelist
 {
     //! Here we hold the content of whitelist
     //private var $data = array();
+    private function usagelog($log_text)
+    {
+        $file_log = fopen( "logs.txt", 'a' );
+        fwrite ( $file_log, $log_text );
+        fclose ( $file_log );
+    }
 
     private function isvalid_action ($id)
     {
-        if ($action == "" or $action == null)
+        if ($id == "" or $id == null)
             return false;
         switch ( $id )
         {
@@ -26,7 +32,7 @@ class Whitelist
     private function name($wikiname)
     {
         //check if the wiki is a valid wiki
-        // yes it is dumb but it can be improved any time ;)
+        //yes it is dumb but it can be improved any time ;)
         switch ($wikiname)
         {
             case "ar.wikipedia":
@@ -125,16 +131,20 @@ class Whitelist
             $data = str_replace("||EOW||", "", $data);
             $handle = fopen($filename, "w");
             $data = str_replace ("|", "|\n", $data);
-            fwrite( $handle , $data, strlen($data) );
-            fclose( $handle );
+            fwrite($handle , $data, strlen($data));
+            fclose($handle);
             echo "Written";
-            //usagelog ( "$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n" );
+            $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n");
         }
     }
 
     private function read($wp)
     {
-        
+        $list = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false;");
+        while ($line = pg_fetch_row($list))
+        {
+           echo $line[0] . "|"; 
+        }
     }
 
     private function display()
@@ -165,10 +175,11 @@ class Whitelist
             die (1);
         }
         $wp = $this->name($wp);
+        psql::Connect();
         switch ($action)
         {
             case "display":
-                $this->display();
+                $this->display($wp);
                 return;
             case "save":
                 $this->save($data, $wp);
@@ -177,6 +188,7 @@ class Whitelist
                 $this->read($wp);
                 return;
         }
+        psql::Disconnect();
     }
 
     public function load($wiki)
