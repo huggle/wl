@@ -140,7 +140,7 @@ class Whitelist
                $result = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false AND name='".$user."';");
                if (pg_num_rows($result) == 0)
                {
-                   psql::exec("INSERT INTO list (name, wiki, insertion_date, creator_name, creator_ip) VALUES ('".$user."', '".$wp."', 'now', 'unknown', '".$_SERVER['REMOTE_ADDR']."');");
+                   psql::exec("INSERT INTO list (name, wiki, insertion_date, creator_name, creator_ip) VALUES (".pg_escape_literal($user).", ".pg_escape_literal($wp).", 'now', 'unknown', ".pg_escape_literal($_SERVER['REMOTE_ADDR']).");");
                }
             }
             psql::exec("COMMIT;");
