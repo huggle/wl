@@ -10,7 +10,7 @@ CREATE TABLE list
   creator_name       text NOT NULL,
   creator_ip         varchar(46) NOT NULL,
   modifier_name      text,
-  modifier_ip        varchar(46),
+  modifier_ip        varchar(46)
 );
 
 CREATE UNIQUE INDEX list_id_idx ON list(list_id);
