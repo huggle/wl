@@ -162,8 +162,9 @@ class Whitelist
     {
         include ("header");
         echo "List of all users in the whitelist for wiki:";
+        $list = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false ORDER BY name ASC;");
+        echo "<br>Total: " .pg_num_rows( $list );
         echo '<table border="1">';
-        $list = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false;");
         while ($line = pg_fetch_row($list))
         {
            echo "<tr><td>".$line[0]."</td></tr>"; 
