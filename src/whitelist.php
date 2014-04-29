@@ -40,7 +40,7 @@ class Whitelist
                 return "ar.wikipedia.org";
             case "en":
             case "en.wikipedia.org":
-                return "en";
+                return "en.wikipedia.org";
             case "fr":
             case "fr.wikipedia":
                 return "fr.wikipedia.org";
@@ -121,19 +121,31 @@ class Whitelist
     private function save($data, $wp)
     {
         //user wants to edit it
-        if ($wp == "" or $wp == null or $data == "" or $data == null or strpos($data,'||EOW||') === false)
+        if ($data == "" or $data == null or strpos($data,'||EOW||') === false)
         {
             // wrong name
+            echo $data;
             echo "Error no data!<!-- failed s4 -->";
             die (1);
         } else
         {
             $data = str_replace("||EOW||", "", $data);
-            $handle = fopen($filename, "w");
-            $data = str_replace ("|", "|\n", $data);
-            fwrite($handle , $data, strlen($data));
-            fclose($handle);
-            echo "Written";
+            $wl = explode("|", $data);
+            psql::exec("BEGIN;LOCK TABLE list IN SHARE MODE;");
+            foreach ($wl as $user)
+            {
+               if ($user == "")
+               {
+                   continue;
+               }
+               // check if user is already in table
+               $result = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false AND name='".$user."';");
+               if (pg_num_rows($result) == 0)
+               {
+                   psql::exec("INSERT INTO list (name, wiki, insertion_date, creator_name, creator_ip) VALUES ('".$user."', '".$wp."', 'now', 'unknown', 'unknown');");
+               }
+            }
+            psql::exec("COMMIT;");
             $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n");
         }
     }
@@ -145,11 +157,21 @@ class Whitelist
         {
            echo $line[0] . "|"; 
         }
+        
     }
 
-    private function display()
+    private function display($wp)
     {
-
+        include ("header");
+        echo "List of all users in the whitelist for wiki:";
+        echo '<table border="1">';
+        $list = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false;");
+        while ($line = pg_fetch_row($list))
+        {
+           echo "<tr><td>".$line[0]."</td></tr>"; 
+        }
+        echo "</table>";
+        include ("footer");
     }
 
     public function init()
@@ -164,6 +186,9 @@ class Whitelist
         if (isset($_POST['wl']))
         {
             $data=$_POST['wl'];
+        }else
+        {
+            $data=$_GET['wl'];
         }
         $action=$_GET['action'];
         if (!$this->isvalid_action ($action))
