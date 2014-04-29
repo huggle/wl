@@ -9,7 +9,6 @@ ini_set('display_errors','1');
 require("whitelist.php");
 
 $starttime = microtime( true );
-$limitsize = 20000000;
 $wl = new Whitelist;
 $wl->init();
 

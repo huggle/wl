@@ -123,8 +123,6 @@ class Whitelist
         //user wants to edit it
         if ($data == "" or $data == null or strpos($data,'||EOW||') === false)
         {
-            // wrong name
-            echo $data;
             echo "Error no data!<!-- failed s4 -->";
             die (1);
         } else
@@ -142,11 +140,11 @@ class Whitelist
                $result = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false AND name='".$user."';");
                if (pg_num_rows($result) == 0)
                {
-                   psql::exec("INSERT INTO list (name, wiki, insertion_date, creator_name, creator_ip) VALUES ('".$user."', '".$wp."', 'now', 'unknown', 'unknown');");
+                   psql::exec("INSERT INTO list (name, wiki, insertion_date, creator_name, creator_ip) VALUES ('".$user."', '".$wp."', 'now', 'unknown', '".$_SERVER['REMOTE_ADDR']."');");
                }
             }
             psql::exec("COMMIT;");
-            $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n");
+            $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . " by " . $_SERVER['REMOTE_ADDR'] . "\n");
         }
     }
 
