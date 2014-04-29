@@ -6,7 +6,7 @@ CREATE TABLE wiki
 CREATE TABLE list
 (
   list_id            bigserial PRIMARY KEY,
-  name               text NOT NULL,
+  name               text NOT NULL UNIQUE,
   wiki               varchar(20) NOT NULL REFERENCES wiki(id),
   insertion_date     timestamp NOT NULL,
   modification_date  timestamp,

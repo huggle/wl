@@ -39,7 +39,7 @@ class Whitelist
             case "ar":
                 return "ar.wikipedia.org";
             case "en":
-            case "en.wikipedia.org":
+            case "en.wikipedia":
                 return "en.wikipedia.org";
             case "fr":
             case "fr.wikipedia":
@@ -75,22 +75,22 @@ class Whitelist
                 return "ru.wikipedia.org";
             case "sv":
             case "sv.wikipedia":
-                return "sv";
+                return "sv.wikipedia.org";
             case "vi":
             case "vi.wikipedia":
-                return "vi";
+                return "vi,wikipedia.org";
             case "ja":
             case "ja.wikipedia":
-                return "ja";
+                return "ja,wikipedia.org";
             case "sv":
             case "sv.wikipedia":
-                return "sv";
+                return "sv.wikipedia.org";
             case "te":
             case "te.wikipedia":
-                return "te";
+                return "te.wikipedia.org";
             case "bg":
             case "bg.wikipedia":
-                return "bg";
+                return "bg,wikipedia.org";
             case "vl":
             case "vl.wikipedia":
                 return "vl";
@@ -102,20 +102,20 @@ class Whitelist
                 return "zh.wikipedia.org";
             case "simple.wikipedia":
             case "simple":
-                return "simple";
+                return "simple.wikipedia.org";
             case "or":
             case "or.wikipedia":
-                return "or";
+                return "or.wikipedia.org";
             case "test wiki":
             case "test.wikipedia":
-                return "test_w";
+                return "test.wikipedia.org";
             case "fa.wikipedia":
             case "fa":
-                return "fa";
+                return "fa.wikipedia.org";
             case "wikidata":
-                return "wikidata";
+                return "wikidata.org";
         }
-        throw new Exception('Invalid wiki');
+        return $wikiname;
     }
 
     private function save($data, $wp)
