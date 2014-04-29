@@ -143,6 +143,7 @@ class Whitelist
                    psql::exec("INSERT INTO list (name, wiki, insertion_date, creator_name, creator_ip) VALUES ('".pg_escape_string($user)."', '".pg_escape_string($wp)."', 'now', 'unknown', '".pg_escape_string($_SERVER['REMOTE_ADDR'])."');");
                }
             }
+            echo "written";
             psql::exec("COMMIT;");
             $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . " by " . $_SERVER['REMOTE_ADDR'] . "\n");
         }
