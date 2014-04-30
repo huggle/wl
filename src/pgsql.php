@@ -48,6 +48,6 @@ class psql
 
     public static function Disconnect()
     {
-        pg_close($db);
+        pg_close(self::$db);
     }
 }
