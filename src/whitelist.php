@@ -137,7 +137,7 @@ class Whitelist
                    continue;
                }
                // check if user is already in table
-               $result = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false AND name='".$user."';");
+               $result = psql::exec("SELECT name FROM list WHERE wiki='".pg_escape_string($wp)."' AND is_deleted=false AND name='".pg_escape_string($user)."';");
                if (pg_num_rows($result) == 0)
                {
                    psql::exec("INSERT INTO list (name, wiki, insertion_date, creator_name, creator_ip) VALUES ('".pg_escape_string($user)."', '".pg_escape_string($wp)."', 'now', 'unknown', '".pg_escape_string($_SERVER['REMOTE_ADDR'])."');");
@@ -151,7 +151,7 @@ class Whitelist
 
     private function read($wp)
     {
-        $list = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false;");
+        $list = psql::exec("SELECT name FROM list WHERE wiki='".pg_escape_string($wp)."' AND is_deleted=false;");
         while ($line = pg_fetch_row($list))
         {
            echo $line[0] . "|"; 
@@ -163,7 +163,7 @@ class Whitelist
     {
         include ("header");
         echo "List of all users in the whitelist for wiki:";
-        $list = psql::exec("SELECT name FROM list WHERE wiki='".$wp."' AND is_deleted=false ORDER BY name ASC;");
+        $list = psql::exec("SELECT name FROM list WHERE wiki='".pg_escape_string($wp)."' AND is_deleted=false ORDER BY name ASC;");
         echo "<br>Total: " .pg_num_rows( $list );
         echo '<table border="1">';
         while ($line = pg_fetch_row($list))
