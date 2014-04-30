@@ -1,24 +1,30 @@
 CREATE TABLE wiki
 (
-  id varchar(20) PRIMARY KEY
+  id number PRIMARY KEY,
+  name varchar(20)
+);
+
+CREATE TABLE revs
+(
+  id       serial PRIMARY KEY,
+  date     timestamp NOT NULL,
+  wiki     number NOT NULL REFERENCES wiki(id),
+  user     text NOT NULL,
+  ip       varchar(46)
 );
 
 CREATE TABLE list
 (
   list_id            bigserial PRIMARY KEY,
-  name               text NOT NULL UNIQUE,
-  wiki               varchar(20) NOT NULL REFERENCES wiki(id),
-  insertion_date     timestamp NOT NULL,
+  name               text NOT NULL,
+  wiki               number NOT NULL REFERENCES wiki(id),
+  rev_id             number NOT NULL REFERENCES revs(id),
   modification_date  timestamp,
   is_deleted         boolean DEFAULT(false),
   deletion_time      timestamp,
-  creator_name       text NOT NULL,
-  creator_ip         varchar(46) NOT NULL,
-  modifier_name      text,
-  modifier_ip        varchar(46)
+  UNIQUE (name, wiki);
 );
 
-CREATE UNIQUE INDEX list_id_idx ON list(list_id);
 CREATE INDEX list_wiki_idx ON list(wiki);
 CREATE INDEX list_name_idx ON list(name);
 CREATE INDEX list_del_idx ON list(is_deleted);
