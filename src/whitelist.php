@@ -169,7 +169,7 @@ class Whitelist
             // select a wiki id
             $wiki = $this->get_wiki($wp);
             // we need to insert a new revision here
-            psql::exec("INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ".$wiki.", 'unknown', '".pg_escape_string($_SERVER['REMOTE_ADDR'])."');");
+            psql::exec("INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ".$wiki.", 'unknown', '".pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR'])."');");
             $result = psql::exec("SELECT lastval();");
             $r = pg_fetch_row($result);
             $revision = $r[0];
@@ -188,7 +188,7 @@ class Whitelist
             }
             echo "written";
             psql::exec("COMMIT;");
-            $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . " by " . $_SERVER['REMOTE_ADDR'] . "\n");
+            $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n");
         }
     }
 

@@ -1,6 +1,6 @@
 <div style="size: small;">
-<p>This file is used for handling the whitelist, use the following actions:</p>
-<p><b>action=save </b>(parameters wp, wl=data) will store the new whitelist in the specific db</p>
+<p>This file is used for handling of the whitelist, use the following actions:</p>
+<p><b>action=save </b>(parameters wp, wl, user) will store the new whitelist in the specific db</p>
 <p><b>action=display</b> (parameters wp) will show the content in human readeable table</p>
 <p><b>action=read</b> (parameter wp) display the content of list (readeable by tools)</p>
 </div>
