@@ -1,18 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
-<HEAD>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<title>Huggle whitelist</title>
-<style type="text/css"> 
-<!--/* <![CDATA[ */
-@import "http://en.wikipedia.org/skins-1.5/monobook/main.css";
-@import "http://bits.wikimedia.org/skins-1.5/common/shared.css";
-td { vertical-align: top; }
- 
-/* ]]> */-->
-</style>
- 
-</HEAD>
- 
-<BODY>
-
+  <HEAD>
+      <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+      <title>Huggle whitelist</title>
+      <link rel="stylesheet" type="text/css" href="style.css" />
+    </HEAD>
+  <BODY>

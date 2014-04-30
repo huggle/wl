@@ -163,13 +163,18 @@ class Whitelist
             die (1);
         } else
         {
+            $un = 'unknown';
+            if (isset($_GET['user']))
+            {
+                $un = $_GET['user'];
+            }
             $data = str_replace("||EOW||", "", $data);
             $wl = explode("|", $data);
             psql::exec("BEGIN;LOCK TABLE list IN SHARE MODE;");
             // select a wiki id
             $wiki = $this->get_wiki($wp);
             // we need to insert a new revision here
-            psql::exec("INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ".$wiki.", 'unknown', '".pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR'])."');");
+            psql::exec("INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ". $wiki .", '". $un ."', '". pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']) ."');");
             $result = psql::exec("SELECT lastval();");
             $r = pg_fetch_row($result);
             $revision = $r[0];
@@ -210,10 +215,10 @@ class Whitelist
         $wiki = $this->get_wiki($wp);
         $list = psql::exec("SELECT name FROM list WHERE wiki=".$wiki." AND is_deleted=false ORDER BY name ASC;");
         echo "<br>Total: " .pg_num_rows( $list );
-        echo '<table border="1">';
+        echo "\n<table border=\"1\">\n";
         while ($line = pg_fetch_row($list))
         {
-           echo "<tr><td>".$line[0]."</td></tr>"; 
+           echo "  <tr><td>".$line[0]."</td></tr>\n"; 
         }
         echo "</table>";
         include ("footer");
