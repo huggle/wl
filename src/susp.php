@@ -29,6 +29,7 @@ error_reporting(E_ALL & ~E_STRICT & ~E_NOTICE);
 ini_set('display_errors','1');
 
 require("pgsql.php");
+require("whitelist.php");
 
 $starttime = microtime( true );
 header('Access-Control-Allow-Origin: *');
@@ -52,7 +53,7 @@ function insert()
    $user = pg_escape_string($_GET['user']);
    $page = pg_escape_string($_GET['page']);
    $score = pg_escape_string($_GET['score']);
-   $wiki = pg_escape_string($_GET['wiki']);
+   $wiki = Whitelist::get_wiki($_GET['wiki']);
    $summary = pg_escape_string($_GET['summary']);
    $revid = pg_escape_string($_GET['revid']);
    psql::exec("INSERT INTO se (revid, score, wiki, date, summary, page, \"user\", ip) VALUES (".$revid.", ".$score.", ".$wiki.", 'now', '".$summary."', '".$page."', '".$user."', '".pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR'])."');");

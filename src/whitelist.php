@@ -143,7 +143,7 @@ class Whitelist
         return $wikiname;
     }
 
-    private function get_wiki($wp)
+    public static function get_wiki($wp)
     {
         $result = psql::exec("SELECT id FROM wiki where name='".pg_escape_string($wp)."';");
         if (pg_num_rows($result) != 1)
@@ -172,7 +172,7 @@ class Whitelist
             $wl = explode("|", $data);
             psql::exec("BEGIN;LOCK TABLE list IN SHARE MODE;");
             // select a wiki id
-            $wiki = $this->get_wiki($wp);
+            $wiki = self::get_wiki($wp);
             // we need to insert a new revision here
             psql::exec("INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ". $wiki .", '". $un ."', '". pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']) ."');");
             $result = psql::exec("SELECT lastval();");
@@ -199,7 +199,7 @@ class Whitelist
 
     private function read($wp)
     {
-        $wiki = $this->get_wiki($wp);
+        $wiki = self::get_wiki($wp);
         $list = psql::exec("SELECT name FROM list WHERE wiki=".$wiki." AND is_deleted=false;");
         while ($line = pg_fetch_row($list))
         {
