@@ -40,8 +40,9 @@ function last()
     // display a list of last edits we have in db
     $wiki = Whitelist::get_wiki($_GET['wp']);
     $result = psql::exec("SELECT * FROM se WHERE wiki = ".$wiki." ORDER BY date DESC;");
-        echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        echo "<results>\n";
+    header('Content-type: application/xml');
+    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    echo "<results>\n";
     while ($row = pg_fetch_row($result)) {
         echo "    <item page=\"".$row[2]."\" revid=\"".$row[3]."\" score=\"".$row[4]."\" user=\"".$row[5]."\"></item>\n";
     }
