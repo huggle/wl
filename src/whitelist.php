@@ -212,13 +212,14 @@ class Whitelist
     {
         include ("header");
         echo "List of all users in the whitelist for wiki:";
-        $wiki = $this->get_wiki($wp);
-        $list = psql::exec("SELECT name FROM list WHERE wiki=".$wiki." AND is_deleted=false ORDER BY name ASC;");
+        $wiki = pg_escape_string($wp);
+        $list = psql::exec("SELECT name, insertion_user, insertion_date FROM whitelist WHERE wiki='".$wiki."' AND is_deleted=false ORDER BY name ASC;");
         echo "<br>Total: " .pg_num_rows( $list );
         echo "\n<table border=\"1\">\n";
+        echo "<tr><th>Name</th><th>Inserted by</th><th>Time of insertion</th></tr>\n";
         while ($line = pg_fetch_row($list))
         {
-           echo "  <tr><td>".$line[0]."</td></tr>\n"; 
+           echo "  <tr><td>".$line[0]."</td><td>".$line[1]."</td><td>".$line[2]."</td></tr>\n"; 
         }
         echo "</table>";
         include ("footer");
