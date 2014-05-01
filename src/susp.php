@@ -44,7 +44,7 @@ function last()
     echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     echo "<results>\n";
     while ($row = pg_fetch_row($result)) {
-        echo "    <item page=\"".$row[6]."\" revid=\"".$row[1]."\" score=\"".$row[2]."\" user=\"".$row[8]."\"></item>\n";
+        echo "    <item page=\"".$row[6]."\" revid=\"".$row[1]."\" score=\"".$row[2]."\" user=\"".$row[8]."\">Summary: ".$row[5]."</item>\n";
     }
     echo "</results>\n";
 }
