@@ -28,7 +28,6 @@
 error_reporting(E_ALL & ~E_STRICT & ~E_NOTICE);
 ini_set('display_errors','1');
 
-require("pgsql.php");
 require("whitelist.php");
 
 $starttime = microtime( true );
@@ -39,7 +38,7 @@ header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 function last()
 {
     // display a list of last edits we have in db
-    $wiki = pg_escape_string($_GET['wp']);
+    $wiki = Whitelist::get_wiki($_GET['wp']);
     $result = psql::exec("SELECT * FROM se WHERE wiki = ".$wiki." ORDER BY date DESC;");
     echo "<results>\n";
     while ($row = pg_fetch_row($result)) {
