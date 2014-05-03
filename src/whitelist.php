@@ -228,10 +228,13 @@ class Whitelist
     public function init()
     {
         $wp=$_GET['wp'];
+        $action=$_GET['action'];
+        if (isset($_POST['wp']))
+        {
+            $wp=$_POST['wp'];
+        }
         if (isset($_POST['action']))
         {
-            // attempt to get it over post
-            $wp=$_POST['wp'];
             $action=$_POST['action'];
         }
         if (isset($_POST['wl']))
@@ -241,7 +244,6 @@ class Whitelist
         {
             $data=$_GET['wl'];
         }
-        $action=$_GET['action'];
         if (!$this->isvalid_action ($action))
         {
             include ("header");
