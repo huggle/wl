@@ -107,9 +107,6 @@ class Whitelist
             case "ja":
             case "ja.wikipedia":
                 return "ja,wikipedia.org";
-            case "sv":
-            case "sv.wikipedia":
-                return "sv.wikipedia.org";
             case "te":
             case "te.wikipedia":
                 return "te.wikipedia.org";
