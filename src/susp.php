@@ -25,25 +25,25 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-error_reporting(E_ALL & ~E_STRICT & ~E_NOTICE);
-ini_set('display_errors','1');
+error_reporting( E_ALL & ~E_STRICT & ~E_NOTICE );
+ini_set( 'display_errors', '1' );
 
-require("whitelist.php");
+require( 'whitelist.php' );
 
 $starttime = microtime( true );
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header( 'Access-Control-Allow-Origin: *' );
+header( 'Access-Control-Allow-Methods: GET, POST, OPTIONS' );
 
 
 function last()
 {
     // display a list of last edits we have in db
-    $wiki = Whitelist::get_wiki($_GET['wp']);
-    $result = psql::exec("SELECT * FROM se WHERE wiki = ".$wiki." ORDER BY date DESC;");
-    header('Content-type: application/xml');
-    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    $wiki = Whitelist::get_wiki( $_GET['wp'] );
+    $result = psql::exec( 'SELECT * FROM se WHERE wiki = ' . $wiki . ' ORDER BY date DESC;' );
+    header( 'Content-type: application/xml' );
+    echo '<?xml version="1.0" encoding="UTF-8"?>\n';
     echo "<results>\n";
-    while ($row = pg_fetch_row($result)) {
+    while ( $row = pg_fetch_row( $result ) ){
         echo "    <item page=\"".$row[6]."\" revid=\"".$row[1]."\" score=\"".$row[2]."\" user=\"".$row[8]."\">Summary: ".$row[5]."</item>\n";
     }
     echo "</results>\n";
@@ -51,13 +51,13 @@ function last()
 
 function insert()
 {
-   $user = pg_escape_string($_GET['user']);
-   $page = pg_escape_string($_GET['page']);
-   $score = pg_escape_string($_GET['score']);
-   $wiki = Whitelist::get_wiki($_GET['wiki']);
-   $summary = pg_escape_string($_GET['summary']);
-   $revid = pg_escape_string($_GET['revid']);
-   psql::exec("INSERT INTO se (revid, score, wiki, date, summary, page, \"user\", ip) VALUES (".$revid.", ".$score.", ".$wiki.", 'now', '".$summary."', '".$page."', '".$user."', '".pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR'])."');");
+   $user = pg_escape_string( $_GET['user'] );
+   $page = pg_escape_string( $_GET['page'] );
+   $score = pg_escape_string( $_GET['score'] );
+   $wiki = Whitelist::get_wiki( $_GET['wiki'] );
+   $summary = pg_escape_string( $_GET['summary'] );
+   $revid = pg_escape_string( $_GET['revid'] );
+   psql::exec( "INSERT INTO se (revid, score, wiki, date, summary, page, \"user\", ip) VALUES (" . $revid . ", " . $score . ", " . $wiki . ", 'now', '" . $summary . "', '" . $page . "', '" . $user . "', '" . pg_escape_string( $_SERVER['HTTP_X_FORWARDED_FOR'] ) . "');" );
    echo "done";
 }
 
@@ -66,10 +66,10 @@ function remove()
 
 }
 
-if (!isset($_GET['action']))
-  throw new Exception("No action");
+if ( !isset( $_GET['action'] ) )
+  throw new Exception( 'No action' );
 psql::Connect();
-switch ($_GET['action'])
+switch ( $_GET['action'] )
 {
     case "last":
       last();

@@ -143,133 +143,133 @@ class Whitelist
         return $wikiname;
     }
 
-    public static function get_wiki($wp)
+    public static function get_wiki( $wp )
     {
-        $result = psql::exec("SELECT id FROM wiki where name='".pg_escape_string($wp)."';");
-        if (pg_num_rows($result) != 1)
+        $result = psql::exec( "SELECT id FROM wiki where name='" . pg_escape_string( $wp ) . "';" );
+        if ( pg_num_rows( $result ) != 1 )
         {
-            throw new Exception('There is no such a wiki');
+            throw new Exception( 'There is no such a wiki' );
         }
-        $item = pg_fetch_row($result);
+        $item = pg_fetch_row( $result );
         return $item[0];
     }
 
-    private function save($data, $wp)
+    private function save( $data, $wp )
     {
         //user wants to edit it
-        if ($data == "" or $data == null or strpos($data,'||EOW||') === false)
+        if ( $data == "" or $data == null or strpos( $data, '||EOW||' ) === false )
         {
             echo "Error no data!<!-- failed s4 -->";
-            die (1);
+            die( 1 );
         } else
         {
             $un = 'unknown';
-            if (isset($_GET['user']))
+            if ( isset( $_GET['user'] ) )
             {
                 $un = $_GET['user'];
             }
-            $data = str_replace("||EOW||", "", $data);
-            $wl = explode("|", $data);
-            psql::exec("BEGIN;LOCK TABLE list IN SHARE MODE;");
+            $data = str_replace( "||EOW||", "", $data );
+            $wl = explode( "|", $data );
+            psql::exec( "BEGIN;LOCK TABLE list IN SHARE MODE;" );
             // select a wiki id
-            $wiki = self::get_wiki($wp);
+            $wiki = self::get_wiki( $wp );
             // we need to insert a new revision here
-            psql::exec("INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ". $wiki .", '". $un ."', '". pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']) ."');");
-            $result = psql::exec("SELECT lastval();");
-            $r = pg_fetch_row($result);
+            psql::exec( "INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ". $wiki .", '". $un ."', '". pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']) ."');" );
+            $result = psql::exec( "SELECT lastval();" );
+            $r = pg_fetch_row( $result );
             $revision = $r[0];
-            foreach ($wl as $user)
+            foreach ( $wl as $user )
             {
-               if ($user == "")
+               if ( $user == "" )
                {
                    continue;
                }
                // check if user is already in table
-               $result = psql::exec("SELECT name FROM list WHERE wiki=".$wiki." AND is_deleted=false AND name='".pg_escape_string($user)."';");
+               $result = psql::exec( "SELECT name FROM list WHERE wiki=".$wiki." AND is_deleted=false AND name='".pg_escape_string($user)."';" );
                if (pg_num_rows($result) == 0)
                {
-                   psql::exec("INSERT INTO list (name, wiki, rev_id) VALUES ('".pg_escape_string($user)."', ".$wiki.", ".$revision.");");
+                   psql::exec( "INSERT INTO list (name, wiki, rev_id) VALUES ('".pg_escape_string($user)."', ".$wiki.", ".$revision.");" );
                }
             }
             echo "written";
-            psql::exec("COMMIT;");
-            $this->usagelog ("$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n");
+            psql::exec( "COMMIT;" );
+            $this->usagelog ( "$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n" );
         }
     }
 
-    private function read($wp)
+    private function read( $wp )
     {
-        $wiki = self::get_wiki($wp);
-        $list = psql::exec("SELECT name FROM list WHERE wiki=".$wiki." AND is_deleted=false;");
-        while ($line = pg_fetch_row($list))
+        $wiki = self::get_wiki( $wp );
+        $list = psql::exec( "SELECT name FROM list WHERE wiki=" . $wiki . " AND is_deleted=false;" );
+        while ( $line = pg_fetch_row( $list ) )
         {
            echo $line[0] . "|"; 
         }
         
     }
 
-    private function display($wp)
+    private function display( $wp )
     {
-        include ("header");
+        include ( "header" );
         echo "List of all users in the whitelist for wiki:";
-        $wiki = pg_escape_string($wp);
-        $list = psql::exec("SELECT name, insertion_user, insertion_date FROM whitelist WHERE wiki='".$wiki."' AND is_deleted=false ORDER BY name ASC;");
+        $wiki = pg_escape_string( $wp );
+        $list = psql::exec( "SELECT name, insertion_user, insertion_date FROM whitelist WHERE wiki='".$wiki."' AND is_deleted=false ORDER BY name ASC;" );
         echo "<br>Total: " .pg_num_rows( $list );
         echo "\n<table border=\"1\">\n";
         echo "<tr><th>Name</th><th>Inserted by</th><th>Time of insertion</th></tr>\n";
-        while ($line = pg_fetch_row($list))
+        while ( $line = pg_fetch_row( $list ) )
         {
-           echo "  <tr><td>".$line[0]."</td><td>".$line[1]."</td><td>".$line[2]."</td></tr>\n"; 
+           echo "  <tr><td>" . $line[0] . "</td><td>" . $line[1] . "</td><td>" . $line[2] . "</td></tr>\n";
         }
         echo "</table>";
-        include ("footer");
+        include ( "footer" );
     }
 
     public function init()
     {
-        $wp=$_GET['wp'];
-        $action=$_GET['action'];
-        if (isset($_POST['wp']))
+        $wp = $_GET['wp'];
+        $action = $_GET['action'];
+        if ( isset( $_POST['wp'] ) )
         {
-            $wp=$_POST['wp'];
+            $wp = $_POST['wp'];
         }
-        if (isset($_POST['action']))
+        if ( isset( $_POST['action'] ) )
         {
-            $action=$_POST['action'];
+            $action = $_POST['action'];
         }
-        if (isset($_POST['wl']))
+        if ( isset( $_POST['wl'] ) )
         {
-            $data=$_POST['wl'];
+            $data = $_POST['wl'];
         }else
         {
-            $data=$_GET['wl'];
+            $data = $_GET['wl'];
         }
-        if (!$this->isvalid_action ($action))
+        if ( !$this->isvalid_action( $action ) )
         {
-            include ("header");
+            include ( "header" );
             echo "Error no action was given, this file is used internally by huggle<!-- failed s1 -->";
-            include ("readme");
-            include ("footer");
-            die (1);
+            include ( "readme" );
+            include ( "footer" );
+            die( 1 );
         }
-        $wp = $this->name($wp);
+        $wp = $this->name( $wp );
         psql::Connect();
-        switch ($action)
+        switch ( $action )
         {
             case "display":
-                $this->display($wp);
+                $this->display( $wp );
                 return;
             case "save":
-                $this->save($data, $wp);
+                $this->save( $data, $wp );
                 return;
             case "read":
-                $this->read($wp);
+                $this->read( $wp );
                 return;
         }
         psql::Disconnect();
     }
 
-    public function load($wiki)
+    public function load( $wiki )
     {
 
     }
