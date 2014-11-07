@@ -202,7 +202,7 @@ class Whitelist
         {
            echo $line[0] . "|"; 
         }
-        
+        echo "<!-- list -->";
     }
 
     private function display( $wp )
