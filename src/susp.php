@@ -63,7 +63,10 @@ function insert()
 
 function remove()
 {
-
+    $id = pg_escape_string( $_GET['id'] );
+    $user = pg_escape_string( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+    psql::exec( "UPDATE se set review = true, review_user = '" . $user . "' WHERE id = '" . $id . "';" );
+    echo "Removed";
 }
 
 if ( !isset( $_GET['action'] ) )
