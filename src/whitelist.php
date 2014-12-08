@@ -142,7 +142,6 @@ class Whitelist
 
     public static function get_wiki( $wp )
     {
-        $wp = name($wp);
         $result = psql::exec( "SELECT id FROM wiki where name='" . pg_escape_string( $wp ) . "';" );
         if ( pg_num_rows( $result ) != 1 )
         {
