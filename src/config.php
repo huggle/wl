@@ -31,3 +31,4 @@ $global_path = "/var/www/data/";
 $global_name = "";
 $global_pw = "";
 $global_db = "wl";
+$global_proxy = false;

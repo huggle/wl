@@ -25,6 +25,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+require ("config.php");
 require ("pgsql.php");
 
 class Whitelist
@@ -153,6 +154,7 @@ class Whitelist
 
     private function save( $data, $wp )
     {
+        global $global_proxy;
         //user wants to edit it
         if ( $data == "" or $data == null or strpos( $data, '||EOW||' ) === false )
         {
@@ -167,11 +169,16 @@ class Whitelist
             }
             $data = str_replace( "||EOW||", "", $data );
             $wl = explode( "|", $data );
+            $ip;
+            if ($global_proxy)
+                $ip = pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']);
+            else
+                $ip = pg_escape_string($_SERVER['REMOTE_ADDR']);
             psql::exec( "BEGIN;LOCK TABLE list IN SHARE MODE;" );
             // select a wiki id
             $wiki = self::get_wiki( $wp );
             // we need to insert a new revision here
-            psql::exec( "INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ". $wiki .", '". $un ."', '". pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']) ."');" );
+            psql::exec( "INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ". $wiki .", '". $un ."', '". $ip ."');" );
             $result = psql::exec( "SELECT lastval();" );
             $r = pg_fetch_row( $result );
             $revision = $r[0];
