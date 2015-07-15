@@ -32,8 +32,8 @@ class psql
 
     public static function Connect()
     {
-        global $global_name, $global_pw;
-        self::$db = pg_connect( 'host=localhost dbname=wl user=' . $global_name . ' password='. $global_pw )
+        global $global_name, $global_pw, $global_sv;
+        self::$db = pg_connect( 'host=' . $global_sv . ' dbname=wl user=' . $global_name . ' password='. $global_pw )
                    or die( 'Could not connect: ' . pg_last_error() );
     } 
 
