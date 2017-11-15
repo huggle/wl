@@ -1,4 +1,4 @@
-<?
+<?php
 /**
 * Copyright (c) 2014, Huggle Corporation
 * All rights reserved.
