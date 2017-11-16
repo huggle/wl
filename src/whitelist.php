@@ -174,7 +174,7 @@ class Whitelist
                 $ip = pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']);
             else
                 $ip = pg_escape_string($_SERVER['REMOTE_ADDR']);
-            psql::exec( "BEGIN;LOCK TABLE list IN SHARE MODE;" );
+            psql::exec( "BEGIN;" );
             // select a wiki id
             $wiki = self::get_wiki( $wp );
             // we need to insert a new revision here
