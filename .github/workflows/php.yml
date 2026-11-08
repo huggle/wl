@@ -54,3 +54,6 @@ jobs:
           WL_TEST_HOST: 127.0.0.1
           WL_TEST_DB: wl_test
           WL_TEST_USER: postgres
+
+      - name: Check proxy IP handling
+        run: php tests/proxy.php

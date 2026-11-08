@@ -34,3 +34,6 @@ $global_pw = "";
 // PostgreSQL database name (may be overridden in config_prod.php).
 $global_db = "huggle-wl";
 $global_proxy = false;
+// Forwarded headers are used only when proxy support is enabled AND the
+// connecting address matches this list of trusted IPv4/IPv6 addresses or CIDRs.
+$global_trusted_proxies = array();
