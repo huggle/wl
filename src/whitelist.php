@@ -106,16 +106,16 @@ class Whitelist
                 return "sv.wikipedia.org";
             case "vi":
             case "vi.wikipedia":
-                return "vi,wikipedia.org";
+                return "vi.wikipedia.org";
             case "ja":
             case "ja.wikipedia":
-                return "ja,wikipedia.org";
+                return "ja.wikipedia.org";
             case "te":
             case "te.wikipedia":
                 return "te.wikipedia.org";
             case "bg":
             case "bg.wikipedia":
-                return "bg,wikipedia.org";
+                return "bg.wikipedia.org";
             case "vl":
             case "vl.wikipedia":
                 return "vl";
