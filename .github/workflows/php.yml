@@ -1,0 +1,56 @@
+name: PHP checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: wl_test
+          POSTGRES_USER: postgres
+          # Expendable test database, accessible only on the runner's loopback.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d wl_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pgsql, simplexml
+          coverage: none
+
+      - name: Check PHP syntax
+        run: bash scripts/lint-php.sh
+
+      - name: Run PostgreSQL regression checks
+        run: php tests/regression.php
+        env:
+          WL_TEST_HOST: 127.0.0.1
+          WL_TEST_DB: wl_test
+          WL_TEST_USER: postgres

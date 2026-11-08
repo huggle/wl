@@ -4,7 +4,10 @@ Requires PHP 8.2 or newer with the PostgreSQL (`pgsql`) extension.
 Set the database connection in `src/config.php`, or override individual settings
 in an optional `src/config_prod.php`. The database name is `$global_db`.
 
-Run PHP syntax checks with `bash .travis.phplint.sh`.
+GitHub Actions runs syntax and PostgreSQL regression checks on PHP 8.2–8.5
+for pushes and pull requests. The workflow can also be started manually.
+
+Run PHP syntax checks with `bash scripts/lint-php.sh`.
 The regression checks also require SimpleXML and an empty, expendable PostgreSQL
 database. They create tables and leave test data in that database:
 
