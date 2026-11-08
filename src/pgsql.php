@@ -25,29 +25,37 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-require ( 'config_prod.php' );
+require_once __DIR__ . '/config.php';
+if ( is_file( __DIR__ . '/config_prod.php' ) )
+    require_once __DIR__ . '/config_prod.php';
 class psql
 {
     public static $db;
 
     public static function Connect()
     {
-        global $global_name, $global_pw, $global_sv;
-        self::$db = pg_connect( 'host=' . $global_sv . ' dbname=wl user=' . $global_name . ' password='. $global_pw )
-                   or die( 'Could not connect: ' . pg_last_error() );
-    } 
+        global $global_name, $global_pw, $global_sv, $global_db;
+        $quote = static function ( $value ) {
+            return "'" . str_replace( array( '\\', "'" ), array( '\\\\', "\\'" ), $value ) . "'";
+        };
+        self::$db = pg_connect( 'host=' . $quote( $global_sv ) . ' dbname=' . $quote( $global_db ) .
+            ' user=' . $quote( $global_name ) . ' password=' . $quote( $global_pw ) );
+        if ( self::$db === false )
+            throw new RuntimeException( 'Could not connect to PostgreSQL' );
+    }
 
-    public static function exec( $q )
+    public static function exec( $q, array $params = array() )
     {
-        $result = pg_query( $q );
+        $result = pg_query_params( self::$db, $q, $params );
         if( !$result )
-            die ( 'Query failed: ' . pg_last_error() );
+            throw new RuntimeException( 'Query failed: ' . pg_last_error( self::$db ) );
         return $result;
-        
+
     }
 
     public static function Disconnect()
     {
         pg_close( self::$db );
+        self::$db = null;
     }
 }

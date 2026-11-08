@@ -29,15 +29,20 @@
 //
 //predefined text
 
-error_reporting( E_ALL & ~E_STRICT & ~E_NOTICE );
-ini_set( 'display_errors', '1' );
+error_reporting( E_ALL );
+ini_set( 'display_errors', '0' );
 
 header( 'Access-Control-Allow-Origin: *' );
 header( 'Access-Control-Allow-Methods: GET, POST, OPTIONS' );
+header( 'Content-Type: text/html; charset=UTF-8' );
 
-require( 'whitelist.php' );
+require_once __DIR__ . '/whitelist.php';
 
-$starttime = microtime( true );
-$wl = new Whitelist;
-$wl->init();
-
+try
+{
+    $wl = new Whitelist;
+    $wl->init();
+} catch ( Throwable $error )
+{
+    respond_error( $error );
+}

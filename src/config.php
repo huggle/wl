@@ -31,5 +31,6 @@ $global_path = "/var/www/data/";
 $global_sv = "localhost";
 $global_name = "";
 $global_pw = "";
-$global_db = "wl";
+// PostgreSQL database name (may be overridden in config_prod.php).
+$global_db = "huggle-wl";
 $global_proxy = false;

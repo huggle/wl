@@ -25,8 +25,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-require ("config.php");
-require ("pgsql.php");
+require_once __DIR__ . '/pgsql.php';
+require_once __DIR__ . '/request.php';
 
 class Whitelist
 {
@@ -35,6 +35,8 @@ class Whitelist
     private function usagelog($log_text)
     {
         $file_log = fopen( "logs.txt", 'a' );
+        if ( $file_log === false )
+            return;
         fwrite ( $file_log, $log_text );
         fclose ( $file_log );
     }
@@ -143,10 +145,10 @@ class Whitelist
 
     public static function get_wiki( $wp )
     {
-        $result = psql::exec( "SELECT id FROM wiki where name='" . pg_escape_string( $wp ) . "';" );
+        $result = psql::exec( 'SELECT id FROM wiki WHERE name = $1;', array( $wp ) );
         if ( pg_num_rows( $result ) != 1 )
         {
-            throw new Exception( 'There is no such a wiki' );
+            throw new InvalidArgumentException( 'There is no such a wiki' );
         }
         $item = pg_fetch_row( $result );
         return $item[0];
@@ -154,32 +156,22 @@ class Whitelist
 
     private function save( $data, $wp )
     {
-        global $global_proxy;
         //user wants to edit it
         if ( $data == "" or $data == null or strpos( $data, '||EOW||' ) === false )
         {
             echo "Error no data!<!-- failed s4 -->";
-            die( 1 );
+            return;
         } else
         {
-            $un = 'unknown';
-            if ( isset( $_GET['user'] ) )
-            {
-                $un = $_GET['user'];
-            }
+            $un = request_value( 'user', 'unknown' );
             $data = str_replace( "||EOW||", "", $data );
             $wl = explode( "|", $data );
-            $ip;
-            if ($global_proxy)
-                $ip = pg_escape_string($_SERVER['HTTP_X_FORWARDED_FOR']);
-            else
-                $ip = pg_escape_string($_SERVER['REMOTE_ADDR']);
+            $ip = client_ip();
             psql::exec( "BEGIN;" );
             // select a wiki id
             $wiki = self::get_wiki( $wp );
             // we need to insert a new revision here
-            psql::exec( "INSERT INTO revs (date, wiki, \"user\", ip) VALUES ('now', ". $wiki .", '". $un ."', '". $ip ."');" );
-            $result = psql::exec( "SELECT lastval();" );
+            $result = psql::exec( 'INSERT INTO revs (date, wiki, "user", ip) VALUES (CURRENT_TIMESTAMP, $1, $2, $3) RETURNING id;', array( $wiki, $un, $ip ) );
             $r = pg_fetch_row( $result );
             $revision = $r[0];
             foreach ( $wl as $user )
@@ -189,88 +181,82 @@ class Whitelist
                    continue;
                }
                // check if user is already in table
-               $result = psql::exec( "SELECT name FROM list WHERE wiki=".$wiki." AND is_deleted=false AND name='".pg_escape_string($user)."';" );
-               if (pg_num_rows($result) == 0)
+               $result = psql::exec( 'SELECT name FROM whitelist WHERE wiki=$1 AND is_deleted=false AND name=$2;', array( $wiki, $user ) );
+               if ( pg_num_rows( $result ) == 0 )
                {
-                   psql::exec( "INSERT INTO list (name, wiki, rev_id) VALUES ('".pg_escape_string($user)."', ".$wiki.", ".$revision.");" );
+                   psql::exec( 'INSERT INTO whitelist (name, wiki, rev_id) VALUES ($1, $2, $3);', array( $user, $wiki, $revision ) );
                }
             }
-            echo "written";
             psql::exec( "COMMIT;" );
+            echo "written";
             $this->usagelog ( "$wp was updated on " . date ( "F j, Y, g:i a" ) .  " size: " . strlen($data) . "\n" );
         }
     }
 
     private function read( $wp )
     {
+        header( 'Content-Type: text/plain; charset=UTF-8' );
         $wiki = self::get_wiki( $wp );
-        $list = psql::exec( "SELECT name FROM list WHERE wiki=" . $wiki . " AND is_deleted=false;" );
+        $list = psql::exec( 'SELECT name FROM whitelist WHERE wiki=$1 AND is_deleted=false;', array( $wiki ) );
         while ( $line = pg_fetch_row( $list ) )
         {
-           echo $line[0] . "|"; 
+           echo $line[0] . "|";
         }
         echo "<!-- list -->";
     }
 
     private function display( $wp )
     {
-        include ( "header" );
+        include __DIR__ . '/header';
         echo "List of all users in the whitelist for wiki:";
-        $wiki = pg_escape_string( $wp );
-        $list = psql::exec( "SELECT name, insertion_user, insertion_date FROM whitelist WHERE wiki='".$wiki."' AND is_deleted=false ORDER BY name ASC;" );
+        $wiki = self::get_wiki( $wp );
+        $list = psql::exec( 'SELECT name, revs.user, revs.date FROM whitelist,revs WHERE whitelist.rev_id = revs.id AND whitelist.wiki=$1 AND is_deleted=false ORDER BY name ASC;', array( $wiki ) );
         echo "<br>Total: " .pg_num_rows( $list );
         echo "\n<table border=\"1\">\n";
         echo "<tr><th>Name</th><th>Inserted by</th><th>Time of insertion</th></tr>\n";
         while ( $line = pg_fetch_row( $list ) )
         {
-           echo "  <tr><td>" . $line[0] . "</td><td>" . $line[1] . "</td><td>" . $line[2] . "</td></tr>\n";
+           echo "  <tr><td>" . html_escape( $line[0] ) . "</td><td>" . html_escape( $line[1] ) . "</td><td>" . html_escape( $line[2] ) . "</td></tr>\n";
         }
         echo "</table>";
-        include ( "footer" );
+        include __DIR__ . '/footer';
     }
 
     public function init()
     {
-        $wp = $_GET['wp'];
-        $action = $_GET['action'];
-        if ( isset( $_POST['wp'] ) )
-        {
-            $wp = $_POST['wp'];
-        }
-        if ( isset( $_POST['action'] ) )
-        {
-            $action = $_POST['action'];
-        }
-        if ( isset( $_POST['wl'] ) )
-        {
-            $data = $_POST['wl'];
-        }else
-        {
-            $data = $_GET['wl'];
-        }
+        $wp = request_value( 'wp' );
+        $action = request_value( 'action' );
+        $data = request_value( 'wl' );
         if ( !$this->isvalid_action( $action ) )
         {
-            include ( "header" );
+            include __DIR__ . '/header';
             echo "Error no action was given, this file is used internally by huggle<!-- failed s1 -->";
-            include ( "readme" );
-            include ( "footer" );
-            die( 1 );
+            include __DIR__ . '/readme';
+            include __DIR__ . '/footer';
+            return;
         }
+        if ( $wp === '' )
+            throw new InvalidArgumentException( 'Missing parameter: wp' );
         $wp = $this->name( $wp );
         psql::Connect();
-        switch ( $action )
+        try
         {
-            case "display":
-                $this->display( $wp );
-                return;
-            case "save":
-                $this->save( $data, $wp );
-                return;
-            case "read":
-                $this->read( $wp );
-                return;
+            switch ( $action )
+            {
+                case "display":
+                    $this->display( $wp );
+                    break;
+                case "save":
+                    $this->save( $data, $wp );
+                    break;
+                case "read":
+                    $this->read( $wp );
+                    break;
+            }
+        } finally
+        {
+            psql::Disconnect();
         }
-        psql::Disconnect();
     }
 
     public function load( $wiki )
